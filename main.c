@@ -196,9 +196,18 @@ int Choice(int* price) {
 void Booking(int* array, int choice, int price)
 {
 	struct Date current, flight;
-	int i, j;
+	int i, j, validate=0;
 	GetSystemDate(&current.d, &current.m, &current.y);
-	printf("\nFlight date (DD/MM/YYYY): "); scanf("%d%*c%d%*c%d", &flight.d, &flight.m, &flight.y);
+	printf("\nFlight date (DD/MM/YYYY): ");
+	scanf("%d/%d/%d", &flight.d, &flight.m, &flight.y);
+	validate= ValidateTime(flight.d, flight.m, flight.y);
+	while (validate == 0)
+	{
+		printf("Date invalid. Please type again: ");
+		scanf("%d/%d/%d", &flight.d, &flight.m, &flight.y);
+		validate = ValidateTime(flight.d, flight.m, flight.y);
+	}
+	printf("%d", flight.d);
 	printf("\nPlease enter your name: ");
 	scanf(" %19[^\n]%*[^\n]", &person[num].name);
 	printf("Please enter your identity number: ");
@@ -365,4 +374,43 @@ int DateDifference(struct Date dt1, struct Date dt2)
 
 	// return difference between two counts 
 	return (n2 - n1);
+}
+
+/*C program to validate date (Check date is valid or not).*/
+
+int ValidateTime(int dd, int mm, int yy)
+{
+	int validate=0;
+
+	//check year
+	if (yy >= 1900 && yy <= 9999)
+	{
+		//check month
+		if (mm >= 1 && mm <= 12)
+		{
+			//check days
+			if ((dd >= 1 && dd <= 31) && (mm == 1 || mm == 3 || mm == 5 || mm == 7 || mm == 8 || mm == 10 || mm == 12))
+				validate = 1;
+			else if ((dd >= 1 && dd <= 30) && (mm == 4 || mm == 6 || mm == 9 || mm == 11))
+				validate = 1;
+			else if ((dd >= 1 && dd <= 28) && (mm == 2))
+				validate = 1;
+			else if (dd == 29 && mm == 2 && (yy % 400 == 0 || (yy % 4 == 0 && yy % 100 != 0)))
+				validate = 1;
+			else
+				validate = 0;
+		}
+		else
+		{
+			validate = 0;
+		}
+	}
+	else
+	{
+		validate = 0;
+	}
+
+	//compare to current date
+
+	return validate;
 }
