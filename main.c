@@ -20,6 +20,7 @@ int num = 0, id2 = 1000;
 //Main
 int main() {
 	int choice1, choice2, select, ** seat, i, price = 0;
+	char time[10];
 	seat = (int**)calloc(49, sizeof(int*));
 	for (i = 0;i < 6;i++)
 		*(seat + i) = (int*)calloc(49, sizeof(int));
@@ -141,7 +142,6 @@ void ChangePrice()
 int Choice(int* price) {
 	int  i = 0, count = 0, j = 0, choice=0;
 	char line[50];
-	char apm[5], time[10];
 
 	//choose route
 	printf("Please choose the route: \n");
@@ -176,23 +176,29 @@ int Choice(int* price) {
 	if (!f) printf("cannot open file");
 	while (fgets(line, sizeof(line), f)) {
 		count++;
-		if (count == (4 + (choice - 1) * 5))
+		if (count == (5 + (choice - 1) * 5))
 		{
-			fscanf(f, "%s %s", &time, &apm);
+			line[strcspn(line, "\n")] = 0;
+			sprintf(person[num].time, line);
 		}
 	}
-	printf("flight time: %s %s", time, apm);
+	printf("flight time: %s", person[num].time);
 	fclose(f);
 	return choice;
 }
 
 
+//Get flight schedule
+
+
+
 //booking ticket
 void Booking(int* array, int choice, int price)
 {
-	int i, j, currentD, currentM, currentY;
-	GetSystemDate(&currentD, &currentM, &currentY);
-
+	struct Date current, flight;
+	int i, j;
+	GetSystemDate(&current.d, &current.m, &current.y);
+	printf("\nFlight date (DD/MM/YYYY): "); scanf("%d%*c%d%*c%d", &flight.d, &flight.m, &flight.y);
 	printf("\nPlease enter your name: ");
 	scanf(" %19[^\n]%*[^\n]", &person[num].name);
 	printf("Please enter your identity number: ");
@@ -238,7 +244,7 @@ void Booking(int* array, int choice, int price)
 	if (j >= 1 && j <= 16) strcpy(person[num].class, "Business");
 	if (j >= 17 && j <= 48) strcpy(person[num].class, "Economy");
 
-	Ticket(id2, price, currentD, currentM, currentY);
+	Ticket(id2, price, current.d, current.m, current.y, flight.d, flight.m, flight.y);
 	id2++;
 	system("pause");
 	system("cls");
@@ -273,7 +279,7 @@ void ReservedTicket(int price)
 
 
 //Ticket
-void Ticket(int id2, int price, int cd, int cm, int cy) {
+void Ticket(int id2, int price, int cd, int cm, int cy, int fd, int fm, int fy) {
 	system("cls");
 	printf("\t                     Booking ticket successfully!");
 	printf("\n\n");
@@ -282,8 +288,8 @@ void Ticket(int id2, int price, int cd, int cm, int cy) {
 	printf("\t Booking ID : %d \t\t\tRoute : %s\n", id2, person[num].route);
 	printf("\t Customer  : %s\n", person[num].name);
 	printf("\t\t\t                       Purchase Date    : %d/%d/%d\n", cd, cm, cy);
-	printf("\t\t\t                       Flight Date      : 21/12/2019\n");
-	printf("\t                                              Time      : 08:00pm\n");
+	printf("\t\t\t                       Flight Date      : %d/%d/%d\n", fd, fm, fy);
+	printf("\t                                              Time      : %s\n", person[num].time);
 	printf("\t Seat Class: %-12s                     Seats No. : %d  \n", person[num].class, person[num].seat);
 	printf("\t                                              Price  : %d  \n\n", price);
 	person[num].id = id2;
@@ -294,7 +300,6 @@ void Ticket(int id2, int price, int cd, int cm, int cy) {
 
 //Get route list from file and assign to array
 void RouteList() {
-	//Get route list
 	int i = 0, count = 0;
 	char line[50];
 	FILE* f;
