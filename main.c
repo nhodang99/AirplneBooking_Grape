@@ -19,14 +19,11 @@ int num = 0, id2 = 1000;
 
 //Main
 int main() {
-	int choice1, choice2, select, ** seat, i, price = 0;
-	char time[10];
+	int choice1, choice2, ** seat, i, price = 0;
 	seat = (int**)calloc(49, sizeof(int*));
 	for (i = 0;i < 6;i++)
 		*(seat + i) = (int*)calloc(49, sizeof(int));
 	int x = 0;
-	printf("\n\n\t\t\t%s, %s\n", __DATE__, __TIME__);
-	_getch();
 	RouteList();
 
 	while (x != 6) {
@@ -96,7 +93,7 @@ void ChangePrice()
 			printf("\t%d. %-30s %d. %-30s\n", j + 1, fRoute[j], j + 2, fRoute[j + 1]);
 		}
 		scanf("%d", &set);
-		while (set < 1 | set>6) {
+		while (set < 1 || set>6) {
 			printf("\nChoice is invalid, please choose another option: ");
 			scanf("%d", &set);
 		}
@@ -150,7 +147,7 @@ int Choice(int* price) {
 	}
 	printf("\nType in your option: ");
 	scanf("%d", &choice);
-	while (choice < 1 | choice>6) {
+	while (choice < 1 || choice>6) {
 		printf("\nChoice is invalid, please choose another option: ");
 		scanf("%d", &choice);
 	}
@@ -188,26 +185,30 @@ int Choice(int* price) {
 }
 
 
-//Get flight schedule
-
-
-
 //booking ticket
 void Booking(int* array, int choice, int price)
 {
 	struct Date current, flight;
 	int i, j, validate=0;
 	GetSystemDate(&current.d, &current.m, &current.y);
-	printf("\nFlight date (DD/MM/YYYY): ");
-	scanf("%d/%d/%d", &flight.d, &flight.m, &flight.y);
-	validate= ValidateTime(flight.d, flight.m, flight.y);
-	while (validate == 0)
+
+	do
 	{
-		printf("Date invalid. Please type again: ");
+		printf("\nFlight date (DD/MM/YYYY): ");
 		scanf("%d/%d/%d", &flight.d, &flight.m, &flight.y);
 		validate = ValidateTime(flight.d, flight.m, flight.y);
-	}
-	printf("%d", flight.d);
+		while (validate == 0)
+		{
+			printf("\nDate invalid. Please type again");
+			printf("\nFlight date (DD/MM/YYYY): ");
+			scanf("%d/%d/%d", &flight.d, &flight.m, &flight.y);
+			validate = ValidateTime(flight.d, flight.m, flight.y);
+		}
+		validate = CompareTime(flight.d, flight.m, flight.y, current.d, current.m, current.y);
+		if (validate == 0) printf("\nDate invalid. Please type again");
+	} 
+	while (validate == 0);
+
 	printf("\nPlease enter your name: ");
 	scanf(" %19[^\n]%*[^\n]", &person[num].name);
 	printf("Please enter your identity number: ");
@@ -235,20 +236,34 @@ void Booking(int* array, int choice, int price)
 		if (i % 4 == 0)
 			printf("\n");
 	}
-	printf("\nWhich seat number you want? \n");
-	scanf("%d", &j);
-	if (j > 48 || j < 1)
+
+	int valiseat = 0;
+	do
 	{
-		printf("Seat number is unavailable in this flight\n");
-		printf("Please re-enter seat number: ");
+		printf("\nWhich seat number do you want? \n");
 		scanf("%d", &j);
-	}
-	if (array[j] == 1)
-	{
-		printf("Sorry, this ticket is already booked! Please choose another seat.\n");
-		scanf("%d", &j);
-	}
-	else array[j] = 1;
+		if (j > 48 || j < 1)
+			valiseat = 0;
+		else valiseat = 1;
+		while (valiseat==0)
+		{
+			printf("Sorry, this seat is unavailable! Please choose another seat.\n");
+			printf("Please re-enter seat number: ");
+			scanf("%d", &j);
+			if (j > 48 || j < 1)
+				valiseat = 0;
+			else valiseat = 1;
+		}
+		if (array[j] == 1)
+		{
+			printf("Sorry, this seat is unavailable! Please choose another seat.\n");
+			valiseat = 0;
+		}
+		else valiseat = 1;
+	} while (valiseat == 0);
+
+	array[j] = 1;
+
 	person[num].seat = j;
 	if (j >= 1 && j <= 16) strcpy(person[num].class, "Business");
 	if (j >= 17 && j <= 48) strcpy(person[num].class, "Economy");
@@ -376,14 +391,15 @@ int DateDifference(struct Date dt1, struct Date dt2)
 	return (n2 - n1);
 }
 
-/*C program to validate date (Check date is valid or not).*/
 
+// validate date (Check date is valid or not)
 int ValidateTime(int dd, int mm, int yy)
 {
 	int validate=0;
 
+	//Check validation of dd, mm ,yy
 	//check year
-	if (yy >= 1900 && yy <= 9999)
+	if (yy >= 1900 && yy <=2030)
 	{
 		//check month
 		if (mm >= 1 && mm <= 12)
@@ -410,7 +426,29 @@ int ValidateTime(int dd, int mm, int yy)
 		validate = 0;
 	}
 
-	//compare to current date
 
+	return validate;
+}
+
+//compare to current date
+int CompareTime(int dd, int mm, int yy, int cd, int cm, int cy)
+{
+	int validate = 0;
+	if (yy == cy)
+	{
+		if (mm > cm)
+			validate = 1;
+		else if (mm == cm)
+		{
+			if (dd >= cd)
+				validate = 1;
+			else validate = 0;
+		}
+		else
+			validate = 0;
+	}
+	else if (yy > cy)
+		validate = 1;
+	else validate = 0;
 	return validate;
 }
