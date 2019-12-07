@@ -191,7 +191,7 @@ void Booking(int* array, int choice, int price)
 	struct Date current, flight;
 	int i, j, validate=0;
 	GetSystemDate(&current.d, &current.m, &current.y);
-
+	sprintf(person[num].purchaseDate, "%d/%d/%d", current.d, current.m, current.y);
 	do
 	{
 		printf("\nFlight date (DD/MM/YYYY): ");
@@ -208,6 +208,9 @@ void Booking(int* array, int choice, int price)
 		if (validate == 0) printf("\nDate invalid. Please type again");
 	} 
 	while (validate == 0);
+
+	sprintf(person[num].purchaseDate, "%d/%d/%d", current.d, current.m, current.y);
+	sprintf(person[num].flightDate, "%d/%d/%d", flight.d, flight.m, flight.y);
 
 	printf("\nPlease enter your name: ");
 	scanf(" %19[^\n]%*[^\n]", &person[num].name);
@@ -268,7 +271,7 @@ void Booking(int* array, int choice, int price)
 	if (j >= 1 && j <= 16) strcpy(person[num].class, "Business");
 	if (j >= 17 && j <= 48) strcpy(person[num].class, "Economy");
 
-	Ticket(id2, price, current.d, current.m, current.y, flight.d, flight.m, flight.y);
+	Ticket(id2, price);
 	id2++;
 	system("pause");
 	system("cls");
@@ -303,20 +306,19 @@ void ReservedTicket(int price)
 
 
 //Ticket
-void Ticket(int id2, int price, int cd, int cm, int cy, int fd, int fm, int fy) {
+void Ticket(int id2, int price) {
 	system("cls");
 	printf("\t                     Booking ticket successfully!");
 	printf("\n\n");
-	printf("\t        ----------------AIRPLANE BOOKING TICKET---------------\n");
+	printf("\t        ------------------AIRPLANE TICKET-----------------\n");
 	printf("\t=====================================================================\n");
 	printf("\t Booking ID : %d \t\t\tRoute : %s\n", id2, person[num].route);
 	printf("\t Customer  : %s\n", person[num].name);
-	printf("\t\t\t                       Purchase Date    : %d/%d/%d\n", cd, cm, cy);
-	printf("\t\t\t                       Flight Date      : %d/%d/%d\n", fd, fm, fy);
+	printf("\t\t\t                       Purchase Date    : %s\n", person[num].purchaseDate);
+	printf("\t\t\t                       Flight Date      : %s\n", person[num].flightDate );
 	printf("\t                                              Time      : %s\n", person[num].time);
 	printf("\t Seat Class: %-12s                     Seats No. : %d  \n", person[num].class, person[num].seat);
 	printf("\t                                              Price  : %d  \n\n", price);
-	person[num].id = id2;
 	printf("\t=====================================================================\n");
 	return;
 }
