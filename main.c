@@ -1,11 +1,11 @@
-#define _CRT_SECURE_NO_WARNINGS
+﻿#define _CRT_SECURE_NO_WARNINGS
 #include<stdio.h>
 #include<stdlib.h>
 #include<conio.h>
 #include<Windows.h>
 #include "Declaration.h"
 #include "Struct.c"
-
+//to-do list: Tách file ra để code dễ đọc hơn
 
 // To store number of days in all months from January to Dec
 int monthDays[12] = { 31, 28, 31, 30, 31, 30,
@@ -87,9 +87,9 @@ void ChangePrice()
 	FILE* f;
 	FILE* fTemp;
 	char buffer[100], nPrice[10];
-	char path[20] = "FlightSchedule.txt";
+	char path[] = "FlightSchedule.txt";
 	int line = 0, count = 0;
-	char pass[20], pak[20] = "pass";
+	char pass[20], pak[] = "pass";
 
 	printf("Enter the password:  ");
 	scanf("%s", &pass);
@@ -338,7 +338,7 @@ void Cancel(char identity[30])
 void ReservedTicket(int price)
 {
 	int i;
-	char pass[10], pak[10] = "pass";
+	char pass[10], pak[] = "pass";
 
 	printf("Enter the password to see details: ");
 	scanf("%s", &pass);
