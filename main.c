@@ -55,6 +55,7 @@ int main() {
 				break;
 		}
 	}
+	free(seat);
 }
 
 
@@ -298,6 +299,10 @@ void Cancel(char identity[30])
 	sprintf(filename, "%s.txt", identity);
 	strcpy(directory, ".\\Tickets\\");
 	strcat(directory, filename);
+	if (remove(directory) == 0)
+		printf("Cancel ticket successfully!\n");
+
+
 	f = fopen(path, "r");
 	if (!f) printf("cannot open file");
 	fTemp = fopen("replace.tmp", "w");
@@ -323,8 +328,6 @@ void Cancel(char identity[30])
 	remove(path);
 	rename("replace.tmp", path);
 
-	if (remove(directory) == 0)
-		printf("Cancel ticket successfully!\n");
 
 	
 	system("pause");
