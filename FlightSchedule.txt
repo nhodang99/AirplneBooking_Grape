@@ -6,7 +6,7 @@ Hanoi-HCM City
 
 
 HCM City-Hanoi
-54
+65
 10:30 AM
 
 
@@ -26,5 +26,5 @@ HCM City-Da Nang
 
 
 Da Nang- HCM City
-47
+50
 8:50 AM

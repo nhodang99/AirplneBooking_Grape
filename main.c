@@ -24,29 +24,35 @@ int main() {
 	for (i = 0;i < 6;i++)
 		*(seat + i) = (int*)calloc(49, sizeof(int));
 	int x = 0;
+	char idc[30];
 	RouteList();
 
 	while (x != 6) {
 		choice1 = Menu();
 		switch (choice1)
 		{
-		case 1: ChangePrice();
-			break;
-		case 3:
-			ReservedTicket(price);
-			break;
-		case 4:
-			choice2= Choice(&price);
-			Booking(seat[choice2 - 1], choice2, price);
-			num++;
-			break;
-		case 6: x = 6;
-			printf("Thank you for using our service!");
-			printf("\n        ______________\n");
-			break;
-		default:
-			printf("Choice not available\n");
-			break;
+			case 1: ChangePrice();
+				break;
+			case 3:
+				ReservedTicket(price);
+				break;
+			case 4:
+				choice2= Choice(&price);
+				Booking(seat[choice2 - 1], choice2, price);
+				num++;
+				break;
+			case 5:
+				printf("Enter your ticket ID: ");
+				scanf("%s", &idc);
+				Cancel(idc);
+				break;
+			case 6: x = 6;
+				printf("Thank you for using our service!");
+				printf("\n        ______________\n");
+				break;
+			default:
+				printf("Choice not available\n");
+				break;
 		}
 	}
 }
@@ -195,13 +201,13 @@ void Booking(int* array, int choice, int price)
 	do
 	{
 		printf("\nFlight date (DD/MM/YYYY): ");
-		scanf("%d/%d/%d", &flight.d, &flight.m, &flight.y);
+		scanf("%d%*c%d%*c%d", &flight.d, &flight.m, &flight.y);
 		validate = ValidateTime(flight.d, flight.m, flight.y);
 		while (validate == 0)
 		{
 			printf("\nDate invalid. Please type again");
 			printf("\nFlight date (DD/MM/YYYY): ");
-			scanf("%d/%d/%d", &flight.d, &flight.m, &flight.y);
+			scanf("%d%*c%d%*c%d", &flight.d, &flight.m, &flight.y);
 			validate = ValidateTime(flight.d, flight.m, flight.y);
 		}
 		validate = CompareTime(flight.d, flight.m, flight.y, current.d, current.m, current.y);
@@ -272,6 +278,7 @@ void Booking(int* array, int choice, int price)
 	if (j >= 17 && j <= 48) strcpy(person[num].class, "Economy");
 
 	Ticket(id2, price);
+	Cusfile(id2, price);
 	id2++;
 	system("pause");
 	system("cls");
@@ -279,7 +286,50 @@ void Booking(int* array, int choice, int price)
 
 
 //Cancel the ticket
+void Cancel(char identity[30])
+{
+	FILE* f;
+	FILE* fTemp;
+	char buffer[30];
+	int line = 0, count = 0;
+	char path[] = "Customer.txt";
+	char filename[20];
+	char directory[300];
+	sprintf(filename, "%s.txt", identity);
+	strcpy(directory, ".\\Tickets\\");
+	strcat(directory, filename);
+	f = fopen(path, "r");
+	if (!f) printf("cannot open file");
+	fTemp = fopen("replace.tmp", "w");
 
+	strcat(filename, "\n");
+	while (strcmp(filename, fgets(buffer, sizeof(buffer), f)) != 0)
+	{
+		line++;
+	}
+	rewind(f);
+	while (fgets(buffer, sizeof(buffer), f))
+	{
+		count++;
+		if (count == line + 1) 
+		{
+			fputs("", fTemp);
+		}
+		else
+			fputs(buffer, fTemp);
+	}
+	fclose(f);
+	fclose(fTemp);
+	remove(path);
+	rename("replace.tmp", path);
+
+	if (remove(directory) == 0)
+		printf("Cancel ticket successfully!\n");
+
+	
+	system("pause");
+	system("cls");
+}
 
 //Reserved ticket
 void ReservedTicket(int price)
@@ -291,12 +341,7 @@ void ReservedTicket(int price)
 	scanf("%s", &pass);
 	if (strcmp(pass, pak) == 0)
 	{
-		if (num == 0) printf("There is no ticket booked yet\n");
-		else
-			for (i = 0;i < num;i++)
-			{
-				printf("seat no: %d is booked by %s booking id is %d, ticket price: %d\n", person[i].seat, person[i].name, person[i].id, price);
-			}
+		
 	}
 	else
 		printf("Entered password is wrong \n");
@@ -319,10 +364,35 @@ void Ticket(int id2, int price) {
 	printf("\t                                              Time      : %s\n", person[num].time);
 	printf("\t Seat Class: %-12s                     Seats No. : %d  \n", person[num].class, person[num].seat);
 	printf("\t                                              Price  : %d  \n\n", price);
+	//person[num].id = id2;
 	printf("\t=====================================================================\n");
 	return;
 }
 
+
+//Print each ticket into a ticket file
+void Cusfile(int id2, int price)
+{
+	FILE* C;
+	FILE* D;
+	char filename[20];
+	char directory[300];
+	char s[300];
+	sprintf(filename, "%s.txt", person[num].identity);
+	strcpy(directory, ".\\Tickets\\");
+	strcat(directory, filename);
+	C = fopen(directory, "w");
+	sprintf(s, "%s\n%s\n%s\n%s\n%s\n%d\n%d", person[num].route, person[num].name, person[num].identity,
+										person[num].purchaseDate, person[num].flightDate, person[num].seat, price);
+	fputs(s, C);
+
+	//Print customer list into Customer.txt
+	D = fopen("Customer.txt", "a+");
+	strcat(filename, "\n");
+	fputs(filename, D);
+	fclose(C);
+	fclose(D);
+}
 
 //Get route list from file and assign to array
 void RouteList() {

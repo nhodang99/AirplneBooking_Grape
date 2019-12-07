@@ -7,8 +7,10 @@ int ChangeFightDate();
 void ReservedTicket(int);
 int TotalPrice();
 void Booking(int*, int, int);
-void Cancel();
-void Ticket(int, int, int, int, int, int, int, int);
+void Cancel(char);
+void Ticket(int, int);
+void Cusfile(int, int);
+
 
 //other small function
 void RouteList(void);
