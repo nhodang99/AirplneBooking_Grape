@@ -6,6 +6,10 @@
 #include "Declaration.h"
 #include "Struct.c"
 //to-do list: Tách file ra để code dễ đọc hơn
+			//Viết code để không cho trùng id, dùng getithline
+			//Viết lại RouteList dùng char** giống ReadFile
+			//phần của thiêm mà xong là phải sửa lại code, sửa lại mảng seat, sửa lại tham số truyền vào booking 
+		
 
 // To store number of days in all months from January to Dec
 int monthDays[12] = { 31, 28, 31, 30, 31, 30,
@@ -18,13 +22,9 @@ struct TicketForm person[300];
 int num = 0, id2 = 1000;
 
 
-
-
-
-
 //Main
 int main() {
-	int choice1, choice2, ** seat, i, price = 0;
+	int choice1, choice2, ** seat, i, originalPrice = 0;
 	seat = (int**)calloc(49, sizeof(int*));
 	for (i = 0;i < 6;i++)
 		*(seat + i) = (int*)calloc(49, sizeof(int));
@@ -39,11 +39,11 @@ int main() {
 			case 1: ChangePrice();
 				break;
 			case 3:
-				ReservedTicket(price);
+				ReservedTicket();
 				break;
 			case 4:
-				choice2= Choice(&price);
-				Booking(seat[choice2 - 1], choice2, price);
+				choice2= Choice(&originalPrice);
+				Booking(seat[choice2 - 1], choice2, originalPrice);
 				num++;
 				break;
 			case 5:
@@ -228,10 +228,11 @@ int Choice(int* price) {
 
 
 //booking ticket
-void Booking(int* array, int choice, int price)
+void Booking(int* array, int choice, int oPrice)
 {
 	struct Date current, flight;
 	int i, j, validate=0;
+	float price = 0;
 	GetSystemDate(&current.d, &current.m, &current.y);
 	sprintf(person[num].purchaseDate, "%d/%d/%d", current.d, current.m, current.y);
 	do
@@ -312,12 +313,77 @@ void Booking(int* array, int choice, int price)
 	person[num].seat = j;
 	if (j >= 1 && j <= 16) strcpy(person[num].class, "Business");
 	if (j >= 17 && j <= 48) strcpy(person[num].class, "Economy");
+	price = TotalPrice(oPrice, current, flight);
+	
+	person[num].totalPrice = price;
 
-	Ticket(id2, price);
-	Cusfile(id2, price);
+	Ticket(id2, oPrice);
+	Cusfile(id2);
 	id2++;
 	system("pause");
 	system("cls");
+}
+
+/*
+//calculate totalprice___Code cua Den ngu lol
+float TotalPrice(int original, struct Date dt1, struct Date dt2)
+{
+	int w, delta = 0;
+	int total = 0;
+	//int p, w, delta = 0;
+	w = Weekday(dt1.d, dt1.m, dt1.y);
+	delta = DateDifference(dt1, dt2);
+	if (w == 0 || w == 5 || w == 6)
+	{
+		if (strcmp(person[num].class, "Business") == 0)
+		{
+			total = original * (1 + 30 / 100 + 10 / 100 - delta / 200);
+		}
+		else if (strcmp(person[num].class, "Economy") == 0)
+		{
+			total = original * (1 + 10 / 100 + 10 / 100 - delta / 200);
+		}
+	}
+	else
+	{
+		if (strcmp(person[num].class, "Business") == 0)
+		{
+			total = original * (1 + 30 / 100 - delta / 200);
+		}
+		else if (strcmp(person[num].class, "Economy") == 0)
+		{
+			total = original * (1 + 10 / 100 - delta / 200);
+		}
+	}
+
+	return total;
+}
+*/
+
+float TotalPrice(int original,struct Date dt1,struct Date dt2)
+{
+	int week, delta = 0;
+	int total = 0;
+	float fee1, fee2, fee3;
+	//int p, w, delta = 0;
+	week = Weekday(dt1.d, dt1.m, dt1.y);
+	delta = DateDifference(dt1, dt2);
+
+	if ((week == 0) || (week == 5) || (week == 6))
+		fee1 = original * 30 / 100;
+	else fee1 = 0;
+
+	if (delta <= 30)
+	fee2 = original * 10 / 100;
+	else if (delta > 30 && delta <= 60)
+		fee2 = original * 7 / 100;
+	else fee2 = 0;
+
+	if (strcmp(person[num].class, "Business") == 0)
+		fee3 = original * 20 / 100;
+	else fee3 = 0;
+	total = original + fee1 + fee2 + fee3;
+	return total;
 }
 
 
@@ -351,10 +417,7 @@ void Cancel(char identity[30])
 	while (fgets(buffer, sizeof(buffer), f))
 	{
 		count++;
-		if (count == line + 1) 
-		{
-			fputs("", fTemp);
-		}
+		if (count == line + 1) {}
 		else
 			fputs(buffer, fTemp);
 	}
@@ -369,7 +432,6 @@ void Cancel(char identity[30])
 //Reserved ticket
 void ReservedTicket()
 {
-	int linenum;
 	char pass[10], pak[] = "pass";
 	char path[] = "Customer.txt";
 	char* line1;
@@ -449,24 +511,21 @@ int countLine(const char* filename)
 }
 
 
-
-
-
-
 //Ticket
-void Ticket(int id2, int price) {
+void Ticket(int id2, int original) {
 	system("cls");
+	printf("\n\n\n");
 	printf("\t                     Booking ticket successfully!");
 	printf("\n\n");
 	printf("\t        ------------------AIRPLANE TICKET-----------------\n");
 	printf("\t=====================================================================\n");
-	printf("\t Booking ID : %d           Route : %s\n", id2, person[num].route);
-	printf("\t Customer  : %s            Identity number: %s\n", person[num].name, person[num].identity);
-	printf("\t\t\t                       Purchase Date    : %s\n", person[num].purchaseDate);
-	printf("\t\t\t                       Flight Date      : %s\n", person[num].flightDate );
+	printf("\t Booking ID : %d             Route : %s\n", id2, person[num].route);
+	printf("\t Customer  : %s              Identity number: %s\n", person[num].name, person[num].identity);
+	printf("\t                             Purchase Date    : %s\n", person[num].purchaseDate);
+	printf("\t                             Flight Date      : %s\n", person[num].flightDate );
 	printf("\t                                              Time      : %s\n", person[num].time);
 	printf("\t Seat Class: %-12s                     Seats No. : %d  \n", person[num].class, person[num].seat);
-	printf("\t                                              Price  : %d  \n\n", price);
+	printf("\t Original price: %d          Total price (including fee) : %d  \n\n", original, person[num].totalPrice);
 	//person[num].id = id2;
 	printf("\t=====================================================================\n");
 	return;
@@ -474,7 +533,7 @@ void Ticket(int id2, int price) {
 
 
 //Print each ticket into a ticket file
-void Cusfile(int id2, int price)
+void Cusfile(int id2)
 {
 	FILE* C;
 	FILE* D;
@@ -486,7 +545,7 @@ void Cusfile(int id2, int price)
 	strcat(directory, filename);
 	C = fopen(directory, "w");
 	sprintf(s, "%s\n%s\n%s\n%s\n%s\n%d\n%d", person[num].route, person[num].name, person[num].identity,
-										person[num].purchaseDate, person[num].flightDate, person[num].seat, price);
+										person[num].purchaseDate, person[num].flightDate, person[num].seat, person[num].totalPrice);
 	fputs(s, C);
 
 	//Print customer list into Customer.txt
