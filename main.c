@@ -17,6 +17,11 @@ struct TicketForm person[300];
 
 int num = 0, id2 = 1000;
 
+
+
+
+
+
 //Main
 int main() {
 	int choice1, choice2, ** seat, i, price = 0;
@@ -58,6 +63,36 @@ int main() {
 	free(seat);
 }
 
+
+// Lấy ra dòng thứ i của 1 file
+char* getithline(char fileName[50], int targetLine)
+{
+	FILE* S;
+	// Lấy ra đường dẫn
+	char directory[200] = "";
+	strcpy(directory, ".\\Tickets\\");
+	strcat(directory, fileName);
+	// Vị trí của dòng hiện tại
+	int tmpcount = 1;
+	// Dòng lấy ra được lưu vào đây
+	char* line = (char*)malloc(200 * sizeof(char));
+	// Mở file
+	S = fopen(directory, "r+");
+	// Đọc lần lượt từng dòng cho đến hết
+	while (fgets(line, 100 * sizeof(char), S))
+	{
+		// Tại vị trí dòng cần đọc, thực hiện nhánh 'if'
+		if (tmpcount == targetLine)
+		{
+			strtok(line, "\n");
+			break;
+		}
+		tmpcount++;
+	}
+	fclose(S);
+	// Trả về giá trị của dòng cần trích thông tin
+	return line;
+}
 
 //Print choices
 int Menu()
@@ -327,30 +362,95 @@ void Cancel(char identity[30])
 	fclose(fTemp);
 	remove(path);
 	rename("replace.tmp", path);
-
-
-	
 	system("pause");
 	system("cls");
 }
 
 //Reserved ticket
-void ReservedTicket(int price)
+void ReservedTicket()
 {
-	int i;
+	int linenum;
 	char pass[10], pak[] = "pass";
-
+	char path[] = "Customer.txt";
+	char* line1;
+	char* line2;
+	char* line3;
+	char* line5;
+	char* line6;
+	char** arrfilenames;
 	printf("Enter the password to see details: ");
 	scanf("%s", &pass);
 	if (strcmp(pass, pak) == 0)
 	{
-		
+		arrfilenames = Readfile(path);
+
+		for (int i = 0; i < (countLine(path) - 1); i++)
+		{
+			// Lưu dòng thứ i của tất cả các file có trong Customer.txt vào linei
+			line1 = getithline(arrfilenames[i], 1);
+			line2 = getithline(arrfilenames[i], 2);
+			line3 = getithline(arrfilenames[i], 3);
+			line5 = getithline(arrfilenames[i], 5);
+			line6 = getithline(arrfilenames[i], 6);
+			printf("\nCustomer '%s', ID number '%s', booked seat '%s' on the route '%s', flight date: %s\n", line2, line3, line6, line1, line5);
+		}
 	}
 	else
 		printf("Entered password is wrong \n");
 	system("PAUSE");
 	system("cls");
 }
+
+
+// Đọc tất cả các dòng trong Customer.txt và lưu vào 1 mảng
+char** Readfile(const char* filename)
+{
+	FILE* R;
+	char line[100];
+	char** customerList;
+	customerList = (char**)malloc(sizeof(char*));
+	int count = 0;
+	R = fopen(filename, "r");
+	while (fgets(line, sizeof(line), R))
+	{
+		customerList = (char**)realloc(customerList, (count + 1) * sizeof(char*));
+		customerList[count] = (char*)malloc(sizeof(line));
+		strcpy(customerList[count], line);
+		strtok(customerList[count], "\n");
+		count++;
+		//CustomerList[count-1][strcspn(CustomerList[count], "\n")] = '\0';
+		// (*count)++;
+	}
+	fclose(R);
+	// Trả các tên file trong Cusfile về CustomerList
+	return customerList;
+}
+
+
+
+// Đếm số dòng của 1 file
+int countLine(const char* filename)
+{
+	FILE* R;
+	char c;
+	// char line[100];
+	// char **CustomerList;
+	// CustomerList = (char **)malloc(sizeof(char *));
+	int count = 1;
+	R = fopen(filename, "r");
+	if (!R)
+		printf("cannot open file");
+	for (c = fgetc(R); c != EOF; c = fgetc(R))
+	{
+		if (c == '\n')
+			count++;
+	}
+	return count;
+}
+
+
+
+
 
 
 //Ticket
@@ -360,8 +460,8 @@ void Ticket(int id2, int price) {
 	printf("\n\n");
 	printf("\t        ------------------AIRPLANE TICKET-----------------\n");
 	printf("\t=====================================================================\n");
-	printf("\t Booking ID : %d \t\t\tRoute : %s\n", id2, person[num].route);
-	printf("\t Customer  : %s\n", person[num].name);
+	printf("\t Booking ID : %d           Route : %s\n", id2, person[num].route);
+	printf("\t Customer  : %s            Identity number: %s\n", person[num].name, person[num].identity);
 	printf("\t\t\t                       Purchase Date    : %s\n", person[num].purchaseDate);
 	printf("\t\t\t                       Flight Date      : %s\n", person[num].flightDate );
 	printf("\t                                              Time      : %s\n", person[num].time);
@@ -396,6 +496,8 @@ void Cusfile(int id2, int price)
 	fclose(C);
 	fclose(D);
 }
+
+
 
 //Get route list from file and assign to array
 void RouteList() {

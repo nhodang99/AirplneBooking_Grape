@@ -4,7 +4,7 @@ int Menu(void);
 int Choice(int*);
 void ChangePrice();
 int ChangeFightDate();
-void ReservedTicket(int);
+void ReservedTicket();
 int TotalPrice();
 void Booking(int*, int, int);
 void Cancel(char);
@@ -13,6 +13,10 @@ void Cusfile(int, int);
 
 
 //other small function
+
+char** Readfile(const char*);
+char* getithline(char, int);
+int countLine(const char*);
 void RouteList(void);
 void GetSystemDate(int*, int*, int*);
 int Weekday(int, int, int);
